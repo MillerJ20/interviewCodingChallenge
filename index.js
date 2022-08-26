@@ -19,47 +19,118 @@
  * will pass valid data to your function.
  */
 
+/*
+* Tests are in './index.test.js', use "NPM RUN TEST" to run
+*/
 function checkForBingo (bingoCard, drawnNumbers) {
-  // this code for debug purposes, you can remove.
-  console.log('Drawn Numbers: ' + JSON.stringify(drawnNumbers));
-
-  for (let i=0, len=bingoCard.length; i<len; i++) {
-    let row = Math.floor(i/5);
-    let col = i % 5;
-   //  console.log(`${row},${col}: ${bingoCard[i]}`);
+  /*
+  * Define a function to search for any additional matches after an initial match is found
+  */
+  const findMatches = (index, direction) => {
+    let matches = 1;
+    while (matches < 5) {
+      /*
+      * Increment index in to next element in sequence according to the inputted direction
+      */
+      switch (direction) {
+        case 'row': 
+          index += 1;
+          break;
+        case 'column': 
+          index += 5;
+          break;
+        case 'diagonal-up': 
+          index -= 4;
+          break;
+        case 'diagonal-down': 
+          index += 6;
+          break;
+      }
+      if (drawnNums.has(bingoCard[index])) {
+        matches++;
+      } else {
+        return false;
+      }
+    }
+    return true;
   }
 
+  /* 
+  * Declare a Set for the drawn numbers and O(1) lookup time using .has(), push 'FREE' to set
+  */
+  const drawnNums = new Set();
+  drawnNums.add('FREE');
+
+  /*
+  * Iterate through the drawnNumbers array ONCE
+  */
+  drawnNumbers.forEach(num => {
+    drawnNums.add(num);
+  })
+
+  /*
+  * Iterate through the elements in the first column to find any horizontal matches 
+  */
+  for (let row = 0; row < 5; row++) {
+    if (drawnNums.has(bingoCard[row * 5])) {
+      if (findMatches(row * 5, 'row')) return true;
+    }
+  }
+  
+  /*
+  * Iterate through the elements in the first row to find any vertical matches 
+  */
+  for (let column = 0; column < 5; column++) {
+    if (drawnNums.has(bingoCard[column])) {
+      if (findMatches(column, 'column')) return true;
+    }
+  }
+
+  /*
+  * If the first element in the array (top left element) or the 20th element (bottom-right element) are a match, check for diagonals
+  */
+  if (drawnNums.has(bingoCard[0])) {
+    if (findMatches(0, 'diagonal-down')) return true;
+  }
+
+  if (drawnNums.has(bingoCard[20])) {
+    if (findMatches(20, 'diagonal-up')) return true;
+  }
+
+  /* 
+  * If none of the findMatches return true, return false
+  */
   return false;
-}
+}                                       
 
 module.exports = checkForBingo;
 
 // here are some samples
 
 // this should return true with diagonal + free
-checkForBingo(
-  [
-    8, 29, 35, 54, 65,
-    13, 24, 44, 48, 67,
-    9, 21, 'FREE', 59, 63,
-    7, 19, 34, 53, 61,
-    1, 20, 33, 46, 72
-  ],
-  [
-    8, 24, 53, 72
-  ]
-);
+// checkForBingo(
+//   [
+//     8, 29, 35, 54, 65,
+//     13, 24, 44, 48, 67,
+//     9, 21, 'FREE', 59, 63,
+//     7, 19, 34, 53, 61,
+//     1, 20, 33, 46, 72
+//   ],
+//   [
+//     8, 24, 53, 72
+//   ]
+// )
 
-// this should return false
-checkForBingo(
-  [
-   8, 29, 35, 54, 65,
-   13, 24, 44, 48, 67,
-   9, 21, 'FREE', 59, 63,
-   7, 19, 34, 53, 61,
-   1, 20, 33, 46, 72
-  ],
-  [
-    1, 33, 53, 65, 29, 75
-  ]
-);
+// // this should return false
+// checkForBingo(
+//   [
+//    8, 29, 35, 54, 65,
+//    13, 24, 44, 48, 67,
+//    9, 21, 'FREE', 59, 63,
+//    7, 19, 34, 53, 61,
+//    1, 20, 33, 46, 72
+//   ],
+//   [
+//     1, 33, 53, 65, 29, 75
+//   ]
+// )
